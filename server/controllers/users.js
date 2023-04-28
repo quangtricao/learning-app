@@ -3,16 +3,19 @@ const usersRouter = require("express").Router();
 const User = require("../models/user");
 
 usersRouter.get("/", async (request, response) => {
-  const users = await User.find({}).populate("blogs", {
-    author: 1,
+  if (!request.user) {
+    return response.status(401).json({ error: "Unauthorized. Token missing or invalid" });
+  }
+
+  const users = await User.find({}).populate("courses", {
     title: 1,
-    url: 1,
-    likes: 1,
+    status: 1,
   });
 
   response.json(users);
 });
 
+// Register a new account
 usersRouter.post("/", async (request, response) => {
   const { username, email, password } = request.body;
 
@@ -22,7 +25,7 @@ usersRouter.post("/", async (request, response) => {
 
   if (!password) {
     return response.status(400).json({
-      error: "invalid password",
+      error: "Missing password. Please provide one",
     });
   }
   if (!passwordRegex.test(password)) {
@@ -35,7 +38,7 @@ usersRouter.post("/", async (request, response) => {
   const existingUser = await User.findOne({ username });
   if (existingUser) {
     return response.status(400).json({
-      error: "username already exists, please choose another one",
+      error: "Username already exists, please choose another one",
     });
   }
 

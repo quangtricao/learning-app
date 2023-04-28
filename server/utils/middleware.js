@@ -18,6 +18,7 @@ const errorHandler = (error, request, response, next) => {
   next(error);
 };
 
+// Find and return User from "users" collection in MongoDB
 const userExtractor = async (request, response, next) => {
   const authorization = request.get("authorization");
 
@@ -30,18 +31,21 @@ const userExtractor = async (request, response, next) => {
     // isolates/detaches the token from the authorization header
     const token = getTokenFrom();
 
-    // The validity of the token is checked with jwt.verify
-    // The method jwt.verify also decodes the token, or returns the Object which the token was based on.
-    // The object decoded from the token, decodedToken, contains 'username' and 'id' fields which tells the server who made the request.
+    // jwt.verify checks the validity of a token, or decodes a token
+    // The method returns the object which the token was based on
+    // The object tells the server who made the request
+    // The object contains 'username' and 'id' fields as follows:
+    // {
+    //   username: ...
+    //   id: ...
+    // }
     // If there is no token passed, it will return an error "jwt must be provided".
     const decodedToken = jwt.verify(token, process.env.SECRET);
 
     if (decodedToken) {
       request.user = await User.findById(decodedToken.id);
     } else {
-      return response
-        .status(401)
-        .json({ error: "token missing or invalid" });
+      return response.status(401).json({ error: "token missing or invalid" });
     }
   }
 
