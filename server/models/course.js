@@ -28,6 +28,6 @@ schema.set("toJSON", {
   },
 });
 
-const Course = mongoose.model("Blog", schema);
+const Course = mongoose.model("Course", schema);
 
 module.exports = Course;
